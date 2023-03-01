@@ -124,16 +124,3 @@ elif [ "$1" == "2b" ]; then
 	done
 
 fi
-
-
-if [ "$1" == "3" ]; then
-	. ~soft_bio_267/initializes/init_R
-	mkdir -p ../similarity_matrix/matrices
-	cd ../similarity_matrix/matrices
-	ln -s ../../executions/aRD_workflow/jiang_conrath_0_900_0/coPatReporter.rb_0000/temp/similarity_matrix_jiang_conrath.npy jiang_conrath
-	ln -s ../../executions/aRD_workflow/lin_0_900_0/coPatReporter.rb_0000/temp/similarity_matrix_lin.npy lin
-	ln -s ../../executions/aRD_workflow/resnik_0_900_0/coPatReporter.rb_0000/temp/similarity_matrix_resnik.npy resnik 
-	cd ..
-	correlate_matrices.R -d 'matrices/*' -o ./	
-
-fi
