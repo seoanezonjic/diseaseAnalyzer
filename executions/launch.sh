@@ -15,7 +15,7 @@ dataset_path=$global_path'/datasets'
 temp_files=$global_path'/executions/temp_files'
 output_folder=$global_path'/executions/aRD_workflow'
 list_path=$global_path'/lists'
-orpha_codes=$dataset_path'/aRD_orpha_codes.txt' #antiguo: raquel_aRD_orpha_codes.txt
+orpha_codes=$dataset_path'/HP:0000365.txt'
 #orpha_codes=$dataset_path'/orphas_2012.txt' #antiguo: raquel_aRD_orpha_codes.txt
 #orpha_codes='/mnt/home/users/pab_001_uma/pedro/proyectos/angio/results/orpha_codes'
 export PATH=$scripts_path:$PATH
@@ -43,7 +43,7 @@ if [ "$1" == "1" ]; then
 	
     ### MONDO File with genes and diseases
 	wget 'http://purl.obolibrary.org/obo/mondo.obo' -O $dataset_path'/mondo.obo'
-	wget 'https://data.monarchinitiative.org/tsv/latest/all_associations/gene_disease.all.tsv.gz' -O $dataset_path'/gene_disease.all.tsv.gz'
+	wget 'https://archive.monarchinitiative.org/latest/tsv/all_associations/gene_disease.all.tsv.gz' -O $dataset_path'/gene_disease.all.tsv.gz'
 	gunzip $dataset_path'/gene_disease.all.tsv.gz'
 fi
 
@@ -73,6 +73,7 @@ similarity_measures=( 'lin' )
 #similarity_measures=( 'lin' 'resnik' 'jiang_conrath' )
 min_groups=( 0 )
 if [ "$1" == "2" ]; then
+	touch $list_path'/white_list'
 	source ~soft_bio_267/initializes/init_autoflow
 	echo 'Launching analysis'
 	for similarity_measure in "${similarity_measures[@]}"
