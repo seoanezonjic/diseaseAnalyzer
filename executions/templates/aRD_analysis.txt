@@ -10,9 +10,9 @@
 }
 
 %generate_clusters){
-	reosurces -t '7-00:00:00' -m '100gb' -c 20
+	resources: -t '7-00:00:00' -m '100gb' -c 20
 	source ~soft_bio_267/initializes/init_netanalyzer
-	source ~soft_bio_267/initializes/init_anaconda
+	source ~soft_bio_267/initializes/init_python
 	export PATH=$scripts_path:$PATH	
 	awk '{ if ($3 >= $combined_score) print $1 "\t" $2 "\t" $3}' $string_network | tail -n +2 > string_sure_conn.txt
 	LAYERS='gene,[A-Za-z0-9]'
@@ -25,7 +25,7 @@
 	cut -f 2 raw_clustered_genes.txt | sort -u > gene_list
 
 	Gene-specific_connectome.py filtered_string.txt gene_list rankings > log
-	parse_hgc.rb -f "rankings/*.txt" -o all_paths  -g gene_list
+	parse_hgc.rb -f "rankings/*.txt" -o all_paths -g gene_list
 	parse_hgc.rb -i all_paths -g raw_clustered_genes.txt -o expanded_clusters -s stats_by_cluster.txt | grep 'node id' > missing_genes.txt
 
 	sort -k2 -n stats_by_cluster.txt | grep -v -w NaN > filtered_stats_by_cluster.txt
@@ -73,11 +73,12 @@
 
 %prioritize_clusters_[connected_raw_clusters;connected_expand_clusters]){
 	. ~soft_bio_267/initializes/init_crank
+
 	mkdir temp
 	cut -f 1,2 generate_clusters)/filtered_string.txt | tr "\t" "\n" | sort -u > temp/string_nodes
 	cut -f 1 generate_clusters)/missing_genes_table.txt > temp/missing_genes
-	cut -f 2 temp/clusters > temp/cl_genes
 	grep -v -F -w -f temp/missing_genes generate_clusters)/(*) | grep -F -w -f temp/string_nodes > temp/clusters
+	cut -f 2 temp/clusters > temp/cl_genes
 	cat temp/string_nodes temp/cl_genes | sort -u | awk '{print $1 "\t" NR}' > temp/gene_index
 	cut -f 1,2 generate_clusters)/filtered_string.txt > temp/crank_string.txt
 	standard_name_replacer.rb -i temp/crank_string.txt -I temp/gene_index -c 1,2
@@ -92,7 +93,7 @@
 	fi
 }
 
-%analyze_clusters_[connected_raw_clusters;connected_expand_clusters]){
+analyze_clusters_[connected_raw_clusters;connected_expand_clusters]){
 	source ~soft_bio_267/initializes/init_degenes_hunter
 	export PATH=~soft_bio_267/programs/x86_64/scripts:$PATH
 	export PATH=$scripts_path:$PATH
@@ -101,7 +102,7 @@
 	clusters_to_enrichment.R -i genes_by_cluster.txt -w 1 -k "SYMBOL" -p 0.01 -c -o aRD_gene_clusters -M 'PRS' -S 0.7 -C 'ancestor' -F
 }
 
-report_data){
+%report_data){
 	source ~soft_bio_267/initializes/init_R
 	source ~soft_bio_267/initializes/init_report_html
 	export PATH=$scripts_path:$PATH	
