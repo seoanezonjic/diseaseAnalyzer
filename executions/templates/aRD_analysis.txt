@@ -1,4 +1,4 @@
-%cohort_analysis){
+cohort_analysis){
 	source ~soft_bio_267/initializes/init_pets
 	?
 	coPatReporter.rb -i $disease_hpo_file -p HPOID -d DiseaseID -C 20 -m $similarity_measure -o disease_clusters
@@ -9,7 +9,7 @@
 	fi
 }
 
-%generate_clusters){
+generate_clusters){
 	resources: -t '7-00:00:00' -m '100gb' -c 20
 	source ~soft_bio_267/initializes/init_netanalyzer
 	source ~soft_bio_267/initializes/init_python
@@ -20,7 +20,7 @@
 	awk '{ if ($2 >= $hub_zscore) print $1 }' node_attributes.txt > computed_hub_nodes
 	intersect_columns.rb -a computed_hub_nodes -b $white_list -k a > hub_nodes
 	grep -v -w -F -f hub_nodes string_sure_conn.txt > filtered_string.txt
-	?
+	?	
 	clusterORPHA_to_clusterGEN.rb -i cohort_analysis)/temp/"$similarity_measure"_clusters.txt -t $disease_gene_file -o raw_clustered_genes.txt -m $min_group -F $gene_filter
 	cut -f 2 raw_clustered_genes.txt | sort -u > gene_list
 
@@ -40,38 +40,8 @@
 	fi
 }
 
-%clustering_robustness_[1-100]){
-	source ~soft_bio_267/initializes/init_pets
-	count=`wc -l < $disease_hpo_file`
-	records=`echo "tot=$count-1; puts (tot-tot*$robustness_fraction).to_i" | ruby`
-	head -n 1 $disease_hpo_file > sample
-	tail -n +2 $disease_hpo_file | shuf -n $records >> sample
-	?
-	coPatReporter.rb -i sample -p HPOID -d DiseaseID -C 20 -m $similarity_measure -o disease_clusters
-	source ~soft_bio_267/initializes/init_anaconda
-	intersect_columns.rb -a $disease_hpo_file -b cohort_analysis)/temp/"$similarity_measure"_clusters.txt -k a | tail -n +2 | awk '{print $1 "\tnot"}' > ref_clust
-	cat cohort_analysis)/temp/"$similarity_measure"_clusters.txt >> ref_clust
-	intersect_columns.rb -a $disease_hpo_file -b sample -k a | awk '{print $1 "\tdummy"}' > sample_clust
-	intersect_columns.rb -a sample -b temp/"lin"_clusters.txt -k a | tail -n +2 | awk '{print $1 "\tdummy"}' >> sample_clust
-	cat temp/"$similarity_measure"_clusters.txt >> sample_clust
-	awk '{print $2 "\t" $1}' ref_clust > ref_clust_sort
-	awk '{print $2 "\t" $1}' sample_clust > sample_clust_sort
-	cdlib_clusterize.py -i generate_clusters)/filtered_string.txt -A ref_clust_sort -B sample_clust_sort > adjusted_mutual_info
-}
 
-%benchmark){
-	source ~soft_bio_267/initializes/init_netanalyzer
-	source ~soft_bio_267/initializes/init_degenes_hunter
-	export PATH=$scripts_path:$PATH	
-	aggregate_column_data.rb -i generate_clusters)/connected_expand_clusters -x 0 -a 1 > genes_by_cluster.txt
-	clusters_to_enrichment.R -i genes_by_cluster.txt -w 1 -k "SYMBOL" -p 0.05 -c -o aRD_gene_clusters -M 'R' -S 0.7 -C 'ancestor' --custom $gmt --gmt_id SYMBOL -f '' -F
-	tail -n +2 aRD_gene_clusters_functional_enrichment/enrichment_all.gmt.csv | awk '{print "^"$1}' > selected_clusters
-	grep -E -w -f selected_clusters generate_clusters)/distances.txt > filtered_distances
-	?
-	get_cdf_table.rb -r $gene_ref_list -i filtered_distances -o cdf_table -t 1,5,10,20,30,50,100,150,200,300 -I 1 -S 2
-}
-
-%prioritize_clusters_[connected_raw_clusters;connected_expand_clusters]){
+prioritize_clusters_[connected_raw_clusters;connected_expand_clusters]){
 	. ~soft_bio_267/initializes/init_crank
 
 	mkdir temp
@@ -102,7 +72,7 @@ analyze_clusters_[connected_raw_clusters;connected_expand_clusters]){
 	clusters_to_enrichment.R -i genes_by_cluster.txt -w 1 -k "SYMBOL" -p 0.01 -c -o aRD_gene_clusters -M 'PRS' -S 0.7 -C 'ancestor' -F
 }
 
-%report_data){
+report_data){
 	source ~soft_bio_267/initializes/init_R
 	source ~soft_bio_267/initializes/init_report_html
 	export PATH=$scripts_path:$PATH	
@@ -117,18 +87,19 @@ analyze_clusters_[connected_raw_clusters;connected_expand_clusters]){
 	combine_files.rb -i generate_clusters)/filtered_stats_by_cluster.txt -f generate_clusters)/connected_expand_clusters -g $disease_gene_file -d cohort_analysis)/temp/"$similarity_measure"_clusters.txt -o expanded_cluster_size_ASP.txt
 	x_y_graph.R -d expanded_cluster_size_ASP.txt -x clusterSize -y aspValue -z diseasePerCluster -X 'Genes by cluster' -Y 'ASP value' -Z '' -o expanded_cluster_size_ASP_dist 
 	merge_tabular.rb !prioritize_clusters_!/crank_metrics.txt > metric_table
-	cat !clustering_robustness_!/adjusted_mutual_info > adjusted_mutual_info
-	plot_density.R -d adjusted_mutual_info -x V1 -X 'Adjusted mutual information' -o adj_mut_inf -H
+	#cat !clustering_robustness_!/adjusted_mutual_info > adjusted_mutual_info
+	#plot_density.R -d adjusted_mutual_info -x V1 -X 'Adjusted mutual information' -o adj_mut_inf -H
 	echo -e '\traw\texpanded' > canvas_table
 	tail -n +2 metric_table |cut -f 1,2,6 | grep -v '-' | sort -r -k 2,2 -n | awk '{print "cl" $0}' >> canvas_table
 	mkdir raw_enrichment
-	ln -s analyze_clusters_connected_raw_clusters)/aRD_gene_clusters_functional_enrichment/*.png raw_enrichment/
+	ln -s analyze_clusters_connected_raw_clusters)/aRD_gene_clusters/*.png raw_enrichment/
 	mkdir expand_enrichment
-	ln -s analyze_clusters_connected_expand_clusters)/aRD_gene_clusters_functional_enrichment/*.png expand_enrichment/
+	ln -s analyze_clusters_connected_expand_clusters)/aRD_gene_clusters/*.png expand_enrichment/
 	rm -rf copat; mkdir copat
 	ln -s cohort_analysis)/temp/"$similarity_measure"_heatmap.png copat/clustering_heatmap.png
 	?
-	report_html -t $report_template -d canvas_table,benchmark)/cdf_table -o cluster_report
+	#report_html -t $report_template -d canvas_table,benchmark)/cdf_table -o cluster_report
+	report_html -t $report_template -d canvas_table -o cluster_report
 	parse_table_info.rb -i $disease_mondo_genes -f $disease_hpo_file -c cohort_analysis)/temp/"$similarity_measure"_clusters.txt -d $phenotype_annotation -o full_info_table.txt
 	tail -n +2 full_info_table.txt | awk -F "\t" '{print "cl" $3 "\t" $2 "\t" $4}' > net_tab
 	table2cyt.rb -i net_tab -o net -c 0,1,2 -t 'cl,dis,gene'

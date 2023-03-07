@@ -9,9 +9,6 @@
 		<%=
 			embed_img("copat/clustering_heatmap.png", 'width="800" height="800"')
 		%>
-		<%=
-			embed_pdf("adj_mut_inf.pdf", 'width="800" height="800"') if File.exist?("adj_mut_inf.pdf")
-		%>
 
 		<h2 style="text-align:center; background-color:#d6eaf8 ">Gene network data</h2>
 		<%=
@@ -49,25 +46,25 @@
 		<div style="width: 100%;">
 				<h3 style="width: 100%;text-align:center; background-color:#d6eaf8 ">Functional enrichment raw clusters in GO: Molecular Functions categories</h3>
 				<%=
-					embed_img("raw_enrichment/emaplot_MF_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("raw_enrichment/emaplot_MF.png", 'width="800" height="800"')
 				%>
 				<%=
-					embed_img("raw_enrichment/dotplot_MF_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("raw_enrichment/dotplot_MF.png", 'width="800" height="800"')
 				%>
 
 				<h3 style="width: 100%;text-align:center; background-color:#d6eaf8 ">Functional enrichment raw clusters in GO: Biological Processes categories</h3>
 				<%=
-					embed_img("raw_enrichment/emaplot_BP_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("raw_enrichment/emaplot_BP.png", 'width="800" height="800"')
 				%>
 				<%=
-					embed_img("raw_enrichment/dotplot_BP_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("raw_enrichment/dotplot_BP.png", 'width="800" height="800"')
 				%>
 				<h3 style="width: 100%;text-align:center; background-color:#d6eaf8 ">Functional enrichment raw clusters in GO: Cellular Components</h3>
 				<%=
-					embed_img("raw_enrichment/emaplot_CC_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("raw_enrichment/emaplot_CC.png", 'width="800" height="800"')
 				%>
 				<%=
-					embed_img("raw_enrichment/dotplot_CC_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("raw_enrichment/dotplot_CC.png", 'width="800" height="800"')
 				%>
 
 		</div>
@@ -76,37 +73,30 @@
 		<div style="width: 100%;">
 				<h3 style="width: 100%;text-align:center; background-color:#d6eaf8 ">Functional enrichment expanded clusters in GO: Molecular Functions categories</h3>
 				<%=
-					embed_img("expand_enrichment/emaplot_MF_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("expand_enrichment/emaplot_MF.png", 'width="800" height="800"')
 				%>	
 				<%=
-					embed_img("expand_enrichment/dotplot_MF_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("expand_enrichment/dotplot_MF.png", 'width="800" height="800"')
 				%>	
 
 				<h3 style="width: 100%;text-align:center; background-color:#d6eaf8 ">Functional enrichment expanded clusters in GO: Biological Processes categories</h3>
 				<%=
-					embed_img("expand_enrichment/emaplot_BP_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("expand_enrichment/emaplot_BP.png", 'width="800" height="800"')
 				%>
 				<%=
-					embed_img("expand_enrichment/dotplot_BP_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("expand_enrichment/dotplot_BP.png", 'width="800" height="800"')
 				%>
 		
 				<h3 style="width: 100%;text-align:center; background-color:#d6eaf8 ">Functional enrichment expanded clusters in GO: Cellular Components</h3>
 				<%=
-					embed_img("expand_enrichment/emaplot_CC_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("expand_enrichment/emaplot_CC.png", 'width="800" height="800"')
 				%>
 				<%=
-					embed_img("expand_enrichment/dotplot_CC_aRD_gene_clusters.png", 'width="800" height="800"')
+					embed_img("expand_enrichment/dotplot_CC.png", 'width="800" height="800"')
 				%>
 			
 		</div>
 
 
-		<h2 style="text-align:center; background-color:#d6eaf8 ">GO benchmark </h2> 
-		<div style="width: 100%;">
- 			<%= scatter2D(id: "cdf_table", header: true, row_names: false, responsive: false,
-                                x_label: 'percentiles', 
-                                title: "cummulative distribution function plot")
- 			%>
-		</div>
 
 

@@ -16,11 +16,11 @@ temp_files=$global_path'/executions/temp_files'
 output_folder=$global_path'/executions/aRD_workflow'
 list_path=$global_path'/lists'
 orpha_codes=$dataset_path'/HP:0000365.txt'
+orpha_codes=$dataset_path'/hearImp_orpha_codes'
 #orpha_codes=$dataset_path'/orphas_2012.txt' #antiguo: raquel_aRD_orpha_codes.txt
 #orpha_codes='/mnt/home/users/pab_001_uma/pedro/proyectos/angio/results/orpha_codes'
 export PATH=$scripts_path:$PATH
 source ~soft_bio_267/initializes/init_pets
-
 
 
 mkdir -p $temp_files $output_folder
@@ -84,7 +84,8 @@ if [ "$1" == "2" ]; then
 			do
 				for gene_filter_value in "${gene_filter_values[@]}"
 				do
-					execution_name=$similarity_measure"_"$min_group"_"$combined_score"_"$gene_filter_value
+					#execution_name=$similarity_measure"_"$min_group"_"$combined_score"_"$gene_filter_value
+					execution_name="hearingImpairment"
 					var_info=`echo -e "\\$similarity_measure=$similarity_measure,
 					\\$string_network=$temp_files/string_transl_network.txt,
 					\\$gmt=$global_path/lists/all.gmt,
