@@ -26,14 +26,11 @@ opt <- parse_args(OptionParser(option_list=option_list))
 ## MAIN
 #####################
 data <- read.table(opt$data_file, header=opt$header, sep="\t")
-print(head(data[[opt$group_values]]))
 pdf(paste(opt$output, '.pdf', sep=""))
 	g <- ggplot(data)
-	if(is.na(opt$group_values)){
-		print('A')
+	if(is.null(opt$group_values)){
 		g <- g + aes(x=data[[opt$x_values]])
 	}else{
-		print('B')
 		g <- g + aes(x=data[[opt$x_values]], group=data[[opt$group_values]], fill=data[[opt$group_values]])
 	}
 	g <- g + xlab(opt$x_legend)
