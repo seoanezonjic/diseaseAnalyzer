@@ -43,6 +43,7 @@ generate_clusters){
 
 prioritize_clusters_[connected_raw_clusters;connected_expand_clusters]){
 	. ~soft_bio_267/initializes/init_crank
+	. ~soft_bio_267/initializes/init_python
 
 	mkdir temp
 	cut -f 1,2 generate_clusters)/filtered_string.txt | tr "\t" "\n" | sort -u > temp/string_nodes
@@ -51,8 +52,8 @@ prioritize_clusters_[connected_raw_clusters;connected_expand_clusters]){
 	cut -f 2 temp/clusters > temp/cl_genes
 	cat temp/string_nodes temp/cl_genes | sort -u | awk '{print $1 "\t" NR}' > temp/gene_index
 	cut -f 1,2 generate_clusters)/filtered_string.txt > temp/crank_string.txt
-	standard_name_replacer.rb -i temp/crank_string.txt -I temp/gene_index -c 1,2
-	standard_name_replacer.rb -i temp/clusters -I temp/gene_index -c 2
+	standard_name_replacer.py -i temp/crank_string.txt -I temp/gene_index -c 1,2 -o temp/crank_string.txt_rep 
+	standard_name_replacer.py -i temp/clusters -I temp/gene_index -c 2 -o temp/clusters_rep
 	aggregate_column_data.rb -i temp/clusters_rep -x 0 -a 1 | tr '\t' ' ' | tr ',' ' ' > temp/clustered_genes_AGG.txt
 	?
 	crank -i:temp/crank_string.txt_rep -c:temp/clustered_genes_AGG.txt -o:crank_metrics.txt
