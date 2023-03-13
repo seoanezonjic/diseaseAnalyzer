@@ -15,7 +15,8 @@ dataset_path=$global_path'/datasets'
 temp_files=$global_path'/executions/temp_files'
 output_folder=$global_path'/executions/aRD_workflow'
 list_path=$global_path'/lists'
-orpha_codes=$dataset_path'/HP:0000365.txt'
+#orpha_codes=$dataset_path'/HP:0000365.txt'
+orpha_codes=$dataset_path'/HP:0000407.txt'
 #orpha_codes=$dataset_path'/hearImp_orpha_codes'
 #orpha_codes=$dataset_path'/orphas_2012.txt' #antiguo: raquel_aRD_orpha_codes.txt
 #orpha_codes='/mnt/home/users/pab_001_uma/pedro/proyectos/angio/results/orpha_codes'
@@ -28,6 +29,7 @@ mkdir -p $temp_files $output_folder $dataset_path
 ontology_file=$dataset_path'/mondo.obo'
 monarch_gene_disease=$dataset_path'/gene_disease.all.tsv'
 string_network=$dataset_path'/string_data.txt'
+
 
 if [ "$1" == "1" ]; then
 	echo 'Downloading files'
@@ -47,6 +49,7 @@ if [ "$1" == "1" ]; then
     ### MONDO File with genes and diseases
 	wget 'http://purl.obolibrary.org/obo/mondo.obo' -O $ontology_file
 	get_lost_xref.rb -i $ontology_file > $temp_files/supp_mondo_orpha.txt
+
 	wget 'https://archive.monarchinitiative.org/latest/tsv/all_associations/gene_disease.all.tsv.gz' -O $monarch_gene_disease'.gz'
 	gunzip $monarch_gene_disease'.gz'
 fi
