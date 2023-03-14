@@ -15,7 +15,7 @@ def load_mondo_file(file):
         for line in f:
             line = line.strip()
             if 'subject_taxon_label' in line: continue
-            info = line.split('\t')
+            info = line.split("\t")
             if info[3] != 'Homo sapiens': continue
             gene_id = info[1].replace(' (human)', '')
             if re.match(r'[^A-Z0-9a-z_-]', gene_id) != None: continue

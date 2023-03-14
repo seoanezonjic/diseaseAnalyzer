@@ -53,18 +53,13 @@ fi
 
 if [ "$1" == "1b" ]; then
 	echo 'preparing files'
-
 	grep -v '#' $temp_files/phenotype.hpoa | grep -v -w 'NOT' | cut -f 1,2,4 > $temp_files/dis_name_phen.txt
 	echo -e "DiseaseID\tHPOID" > $temp_files/disease_hpos.txt
 	grep -w -F -f $orpha_codes $temp_files/dis_name_phen.txt | cut -f 1,3 | sort -u | aggregate_column_data.rb -i - -s '|' -x 0 -a 1 >> $temp_files/disease_hpos.txt
-	###grep -w -F -f $orpha_codes $temp_files/genes_to_phenotype.txt | cut -f 3,2,9 | sort -u > $temp_files/genes_hpo_disease.txt
-	###parse_genes_hpo_disease.rb -i $temp_files/genes_hpo_disease.txt -g $temp_files/disease_genes.txt
-	#get_disease_mondo.rb -i $orpha_codes -k 'Orphanet:[0-9]*|OMIM:[0-9]*' -f $ontology_file -o $temp_files/disease_mondo_codes.txt
-	#get_mondo_genes.rb -i $temp_files/disease_mondo_codes.txt -m $monarch_gene_disease -o $temp_files/disease_mondo_genes.txt
+	get_disease_mondo.rb -i $orpha_codes -k 'Orphanet:[0-9]*|OMIM:[0-9]*' -f $ontology_file -o $temp_files/disease_mondo_codes.txt
 	get_mondo_genes.py -i $temp_files/disease_mondo_codes.txt -m $monarch_gene_disease -o $temp_files/disease_mondo_genes_py.txt
-	exit
 	cut -f 1,3 $temp_files/disease_mondo_genes.txt > $temp_files/disease_genes.txt
-	trad_cluster_stringtogen.rb -i $string_network -d $temp_files"/9606.protein.info.v11.5.txt" -o $temp_files/string_transl_network.txt -n $temp_files/untranslated_genes.txt 
+	trad_cluster_stringtogen.py -i $string_network -d $temp_files"/9606.protein.info.v11.5.txt" -o $temp_files/string_transl_network.txt -n $temp_files/untranslated_genes.txt 
 fi
 
 gene_filter_values=( 0 )
