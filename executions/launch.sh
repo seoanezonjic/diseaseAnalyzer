@@ -52,14 +52,19 @@ if [ "$1" == "1" ]; then
 fi
 
 if [ "$1" == "1b" ]; then
+	#source ~soft_bio_267/initializes/init_semtools
 	echo 'preparing files'
 	grep -v '#' $temp_files/phenotype.hpoa | grep -v -w 'NOT' | cut -f 1,2,4 > $temp_files/dis_name_phen.txt
 	echo -e "DiseaseID\tHPOID" > $temp_files/disease_hpos.txt
 	grep -w -F -f $orpha_codes $temp_files/dis_name_phen.txt | cut -f 1,3 | sort -u | aggregate_column_data.rb -i - -s '|' -x 0 -a 1 >> $temp_files/disease_hpos.txt
-	get_disease_mondo.rb -i $orpha_codes -k 'Orphanet:[0-9]*|OMIM:[0-9]*' -f $ontology_file -o $temp_files/disease_mondo_codes.txt
+	# Sustituir por código de SemTools
+	#get_disease_mondo.rb -i $orpha_codes -k 'Orphanet:[0-9]*|OMIM:[0-9]*' -f $ontology_file -o $temp_files/disease_mondo_codes.txt
+	sed 's/ORPHA/Orphanet/g' $orpha_codes > $temp_files/orphanet_IDs
+	semtools.py -i $temp_files/orphanet_IDs --list -k "Orphanet:[0-9]*|OMIM:[0-9]*" -O MONDO -o $temp_files/disease_mondo_codes.txt
+	sed -i 's/Orphanet/ORPHA/g' $temp_files/disease_mondo_codes.txt
 	get_mondo_genes.py -i $temp_files/disease_mondo_codes.txt -m $monarch_gene_disease -o $temp_files/disease_mondo_genes_py.txt
 	cut -f 1,3 $temp_files/disease_mondo_genes.txt > $temp_files/disease_genes.txt
-	trad_cluster_stringtogen.py -i $string_network -d $temp_files"/9606.protein.info.v11.5.txt" -o $temp_files/string_transl_network.txt -n $temp_files/untranslated_genes.txt 
+	standard_name_replacer.py -i $string_network -I $temp_files"/9606.protein.info.v11.5.txt" -c 1,2 -s ' ' | tr ' ' '\t' > $temp_files/string_transl_network.txt
 fi
 
 gene_filter_values=( 0 )

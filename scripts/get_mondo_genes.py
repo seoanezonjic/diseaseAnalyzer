@@ -13,7 +13,7 @@ def load_mondo_file(file):
     mondo_genes = {}
     with open(file, 'r') as f:
         for line in f:
-            line = line.strip()
+            line = line.rstrip()
             if 'subject_taxon_label' in line: continue
             info = line.split("\t")
             if info[3] != 'Homo sapiens': continue
@@ -31,7 +31,7 @@ def find_genes(input_file, mondo_genes, output_file):
     orpha_mondo_genes = []
     with open(input_file) as f:
         for line in f:
-            line = line.strip()
+            line = line.rstrip()
             orpha_id, mondo_id = line.split("\t")
             disease_genes = mondo_genes.get(mondo_id)
             if disease_genes is not None:

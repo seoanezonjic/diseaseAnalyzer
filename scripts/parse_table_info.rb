@@ -165,3 +165,5 @@ File.open(options[:output_clusters_orpha_table], 'w') do |f|
 		f.puts "#{clusterID}\t#{diseases.join(',')}"
 	end
 end
+
+	
