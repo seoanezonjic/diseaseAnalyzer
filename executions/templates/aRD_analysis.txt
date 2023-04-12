@@ -21,7 +21,7 @@ generate_clusters){
 	intersect_columns.py -a computed_hub_nodes -b $white_list -k a > hub_nodes
 	grep -v -w -F -f hub_nodes string_sure_conn.txt > filtered_string.txt
 	?	
-	clusterORPHA_to_clusterGEN.rb -i cohort_analysis)/temp/"$similarity_measure"_clusters.txt -t $disease_gene_file -o raw_clustered_genes.txt -m $min_group -F $gene_filter
+	clusterORPHA_to_clusterGEN.py -i cohort_analysis)/temp/"$similarity_measure"_clusters.txt -t $disease_gene_file -o raw_clustered_genes.txt -m $min_group -F $gene_filter
 	cut -f 2 raw_clustered_genes.txt | sort -u > gene_list
 
 	Gene-specific_connectome.py filtered_string.txt gene_list rankings > log
@@ -76,16 +76,17 @@ analyze_clusters_[connected_raw_clusters;connected_expand_clusters]){
 report_data){
 	source ~soft_bio_267/initializes/init_R
 	source ~soft_bio_267/initializes/init_report_html
+	source ~soft_bio_267/initializes/init_python
 	export PATH=$scripts_path:$PATH	
 	plot_density.R -d generate_clusters)/filtered_string.txt -x V3 -X 'STRING combined score' -o combined_score_dist -H
 	plot_density.R -d generate_clusters)/node_attributes.txt -x V3 -X Degree -o degree -H
 	plot_density.R -d generate_clusters)/gene_stats.txt -x freq -X 'Number of ocurrences' -o gene_stats
 	#Scatterplots:
-	combine_files.rb -i generate_clusters)/filtered_stats_by_cluster.txt -f generate_clusters)/connected_raw_clusters -g $disease_gene_file -d cohort_analysis)/temp/"$similarity_measure"_clusters.txt -o raw_cluster_size_ASP.txt
+	combine_files.py -i generate_clusters)/filtered_stats_by_cluster.txt -f generate_clusters)/connected_raw_clusters -g $disease_gene_file -d cohort_analysis)/temp/"$similarity_measure"_clusters.txt -o raw_cluster_size_ASP.txt
 	#disPerClust => diseases_per_cluster (cuantas enf. del cluster presentan al menos 1 gen asociado)
 	#clusterSize => genes per cluster
 	x_y_graph.R -d raw_cluster_size_ASP.txt -x clusterSize -y aspValue -z diseasePerCluster -X 'Genes by cluster' -Y 'ASP value' -Z '' -o raw_cluster_size_ASP_dist 
-	combine_files.rb -i generate_clusters)/filtered_stats_by_cluster.txt -f generate_clusters)/connected_expand_clusters -g $disease_gene_file -d cohort_analysis)/temp/"$similarity_measure"_clusters.txt -o expanded_cluster_size_ASP.txt
+	combine_files.py -i generate_clusters)/filtered_stats_by_cluster.txt -f generate_clusters)/connected_expand_clusters -g $disease_gene_file -d cohort_analysis)/temp/"$similarity_measure"_clusters.txt -o expanded_cluster_size_ASP.txt
 	x_y_graph.R -d expanded_cluster_size_ASP.txt -x clusterSize -y aspValue -z diseasePerCluster -X 'Genes by cluster' -Y 'ASP value' -Z '' -o expanded_cluster_size_ASP_dist 
 	merge_tabular.py !prioritize_clusters_!/crank_metrics.txt > metric_table
 	#cat !clustering_robustness_!/adjusted_mutual_info > adjusted_mutual_info
@@ -101,8 +102,10 @@ report_data){
 	?
 	#report_html -t $report_template -d canvas_table,benchmark)/cdf_table -o cluster_report
 	report_html -t $report_template -d canvas_table -o cluster_report
-	parse_table_info.rb -i $disease_mondo_genes -f $disease_hpo_file -c cohort_analysis)/temp/"$similarity_measure"_clusters.txt -d $phenotype_annotation -o full_info_table.txt
+	parse_table_info.py -i $disease_mondo_genes -f $disease_hpo_file -c cohort_analysis)/temp/"$similarity_measure"_clusters.txt -d $phenotype_annotation -o full_info_table.txt
+	#parse_table_info.rb -i $disease_mondo_genes -f $disease_hpo_file -c cohort_analysis)/temp/"$similarity_measure"_clusters.txt -d $phenotype_annotation -o full_info_table.txt
 	tail -n +2 full_info_table.txt | awk -F "\t" '{print "cl" $3 "\t" $2 "\t" $4}' > net_tab
+	# Use NetAnalyzer instead of table2cyt: method = cyt_app
 	table2cyt.rb -i net_tab -o net -c 0,1,2 -t 'cl,dis,gene'
 	aggregate_column_data.py -i generate_clusters)/raw_clustered_genes.txt -x 1 -a 2 -s ',' > genes_by_cluster_ALL.txt
 	echo -e "Cluster_id\tASP_value\tAssociated_genes_by_MONDO\tASP_expanded_genes" > cluster_table.txt

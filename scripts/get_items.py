@@ -12,7 +12,8 @@ with open(args.input, 'r') as f:
 
 items = []
 for assoc in data['associations']:
-    items.append(assoc['object']['id'])
+    term = assoc['object']['id']
+    if term not in items: items.append(term)
 
 for item in items:
     print(item)
