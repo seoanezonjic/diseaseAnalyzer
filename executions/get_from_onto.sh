@@ -14,9 +14,6 @@ source ~soft_bio_267/initializes/init_python
 
 if [ "$1" == "1" ]; then
 	mkdir $list_path
-	#MP:0000260 => MPO: abnormal angiogenesis
-	#MP:0000259 => MPO: abnormal vascular development
-	#HP:0002597 => HPO: Abnormality of the vasculature
 	term=$2
 	enc_term=`echo -e $term | sed 's/:/%3A/g'`
 	wget 'https://api.monarchinitiative.org/api/bioentity/phenotype/'$enc_term'/diseases?rows=10000&facet=false&unselect_evidence=false&exclude_automatic_assertions=false&fetch_objects=false&use_compact_associations=false&direct_taxon=false' -O $list_path/$term.json
