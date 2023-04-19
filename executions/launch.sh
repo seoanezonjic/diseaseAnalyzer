@@ -56,6 +56,7 @@ if [ "$1" == "1b" ]; then
 	echo 'preparing files'
 	grep -v '#' $temp_files/phenotype.hpoa | grep -v -w 'NOT' | cut -f 1,2,4 > $temp_files/dis_name_phen.txt
 	echo -e "DiseaseID\tHPOID" > $temp_files/disease_hpos.txt
+	#grep -w -F -f $orpha_codes $temp_files/dis_name_phen.txt | cut -f 1,3 | sort -u | aggregate_column_data.py -i - -s '|' -x 1 -a 2 >> $temp_files/disease_hpos.txt
 	grep -w -F -f $orpha_codes $temp_files/dis_name_phen.txt | cut -f 1,3 | sort -u | aggregate_column_data.rb -i - -s '|' -x 0 -a 1 >> $temp_files/disease_hpos.txt
 	sed 's/ORPHA/Orphanet/g' $orpha_codes > $temp_files/orphanet_IDs
 	semtools.py -i $temp_files/orphanet_IDs --list -k "Orphanet:[0-9]*|OMIM:[0-9]*" -O MONDO -o $temp_files/disease_mondo_codes.txt

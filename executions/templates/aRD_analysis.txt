@@ -25,6 +25,7 @@ generate_clusters){
 	cut -f 2 raw_clustered_genes.txt | sort -u > gene_list
 
 	Gene-specific_connectome.py filtered_string.txt gene_list rankings > log
+	# Implementar aqui netanalyzer para expandir la red
 	parse_hgc.rb -f "rankings/*.txt" -o all_paths -g gene_list
 	parse_hgc.rb -i all_paths -g raw_clustered_genes.txt -o expanded_clusters -s stats_by_cluster.txt | grep 'node id' > missing_genes.txt
 
@@ -103,10 +104,13 @@ report_data){
 	#report_html -t $report_template -d canvas_table,benchmark)/cdf_table -o cluster_report
 	report_html -t $report_template -d canvas_table -o cluster_report
 	parse_table_info.py -i $disease_mondo_genes -f $disease_hpo_file -c cohort_analysis)/temp/"$similarity_measure"_clusters.txt -d $phenotype_annotation -o full_info_table.txt
-	#parse_table_info.rb -i $disease_mondo_genes -f $disease_hpo_file -c cohort_analysis)/temp/"$similarity_measure"_clusters.txt -d $phenotype_annotation -o full_info_table.txt
 	tail -n +2 full_info_table.txt | awk -F "\t" '{print "cl" $3 "\t" $2 "\t" $4}' > net_tab
-	# Use NetAnalyzer instead of table2cyt: method = cyt_app
+	# Use NetAnalyzer instead of table2cyt: method = cyt_app, ejemplo en sylentis (ver configuración de layers)
+	# LAYERS='cluster,[0-9];disease,[.];gene,[]'
+    # netanalyzer.py -i net_tab -l $LAYERS -g processed/disease_tree --graph_options 'method=cytoscape'
+	
 	table2cyt.rb -i net_tab -o net -c 0,1,2 -t 'cl,dis,gene'
+
 	aggregate_column_data.py -i generate_clusters)/raw_clustered_genes.txt -x 1 -a 2 -s ',' > genes_by_cluster_ALL.txt
 	echo -e "Cluster_id\tASP_value\tAssociated_genes_by_MONDO\tASP_expanded_genes" > cluster_table.txt
 	merge_tabular.py generate_clusters)/stats_by_cluster.txt genes_by_cluster_ALL.txt analyze_clusters_connected_expand_clusters)/genes_by_cluster.txt | sed 's/None/-/g' >> cluster_table.txt
