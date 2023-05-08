@@ -1,4 +1,4 @@
-cohort_analysis){
+%cohort_analysis){
 	source ~soft_bio_267/initializes/init_pets
 	?
 	coPatReporter.rb -i $disease_hpo_file -p HPOID -d DiseaseID -C 20 -m $similarity_measure -o disease_clusters
@@ -14,33 +14,35 @@ generate_clusters){
 	source ~soft_bio_267/initializes/init_netanalyzer
 	source ~soft_bio_267/initializes/init_python
 	export PATH=$scripts_path:$PATH	
-	awk '{ if ($3 >= $combined_score) print $1 "\t" $2 "\t" $3}' $string_network | tail -n +2 > string_sure_conn.txt
+	touch missing_genes.txt
 	LAYERS='gene,[A-Za-z0-9]'
+	awk '{ if ($3 >= $combined_score) print $1 "\t" $2 "\t" $3}' $string_network | tail -n +2 > string_sure_conn.txt
 	netanalyzer.py -i string_sure_conn.txt -l $LAYERS -A 'get_degree,get_degreeZ' -o out
-	awk '{ if ($2 >= $hub_zscore) print $1 }' node_attributes.txt > computed_hub_nodes
+	awk '{ if ($3 >= $hub_zscore) print $1 }' node_attributes.txt > computed_hub_nodes
 	intersect_columns.py -a computed_hub_nodes -b $white_list -k a > hub_nodes
-	grep -v -w -F -f hub_nodes string_sure_conn.txt > filtered_string.txt
+	# Invert string value to calculate ASP (djkistra algorithm)
+	grep -v -w -F -f hub_nodes string_sure_conn.txt | awk '{print $1 "\t" $2 "\t" 1000 - $3}' > filtered_string.txt
 	?	
-	clusterORPHA_to_clusterGEN.py -i cohort_analysis)/temp/"$similarity_measure"_clusters.txt -t $disease_gene_file -o raw_clustered_genes.txt -m $min_group -F $gene_filter
-	cut -f 2 raw_clustered_genes.txt | sort -u > gene_list
+	clusterORPHA_to_clusterGEN.py -i cohort_analysis)/temp/"$similarity_measure"_clusters.txt -t $disease_gene_file -o raw_clustered_genes.txt -m $min_group -F $gene_filter # to get genes for each disease cluster
+	## /mnt/home/users/bio_267_uma/federogc/projects/sylentis_target_prediction/workflow_results/netanalyzer.py_0000	
+	## Expand clusters by genes and calculate ASP:
 
-	Gene-specific_connectome.py filtered_string.txt gene_list rankings > log
-	# Implementar aqui netanalyzer para expandir la red (-e)
-	parse_hgc.rb -f "rankings/*.txt" -o all_paths -g gene_list
-	parse_hgc.rb -i all_paths -g raw_clustered_genes.txt -o expanded_clusters -s stats_by_cluster.txt | grep 'node id' > missing_genes.txt
+	netanalyzer.py -i filtered_string.txt -G raw_clustered_genes.txt -l $LAYERS -x 'sht_path' --one_sht_pairs &> all_missing_genes.txt
+	cut -d ' ' -f 2,3,9 all_missing_genes.txt | grep 'id:' | cut -d ' ' -f 2,3 | tr ' ' "\t" | awk '{print $2 "\t" $1}' > missing_genes.txt
 
-	sort -k2 -n stats_by_cluster.txt | grep -v -w NaN > filtered_stats_by_cluster.txt
+	netanalyzer.py -i filtered_string.txt -G raw_clustered_genes.txt -l $LAYERS --output_metrics_by_cluster group_metrics.txt -M 'avg_sht_path'
+
+	tail -n +2 group_metrics.txt | sort -k2 -n | grep -v -w NULL > filtered_stats_by_cluster.txt
 	cut -f 1 filtered_stats_by_cluster.txt > connected_clusters.txt
 	grep -w -F -f connected_clusters.txt raw_clustered_genes.txt > connected_raw_clusters
-	grep -w -F -f connected_clusters.txt expanded_clusters > connected_expand_clusters
-	cut -d ' ' missing_genes.txt -f 1,6 | tr ' ' '\t' | aggregate_column_data.py -i - -x 1 -a 2 -s ',' > missing_genes_table.txt
+	grep -w -F -f connected_clusters.txt expand_clusters.txt > connected_expand_clusters	
+	aggregate_column_data.py -i missing_genes.txt -x 1 -a 2 -s ',' > missing_genes_table.txt
 
-	if [ ! -s raw_clustered_genes.txt ] || [ ! -s expanded_clusters ]; then
+	if [ ! -s raw_clustered_genes.txt ] || [ ! -s expand_clusters.txt ]; then
 		>&2 echo "Clustering has failed"
 		exit 1
 	fi
 }
-
 
 prioritize_clusters_[connected_raw_clusters;connected_expand_clusters]){
 	. ~soft_bio_267/initializes/init_crank
@@ -111,9 +113,6 @@ report_data){
 	# Use NetAnalyzer instead of table2cyt: method = cyt_app, ejemplo en sylentis (ver configuración de layers)
 	LAYERS='cl,cl[0-9]*;dis,\*;gene,\S*'
     netanalyzer.py -i net_tab -l $LAYERS -g cluster_disease_gene_net --graph_options 'method=cyt_app'
-	
-	#table2cyt.rb -i net_tab -o net -c 0,1,2 -t 'cl,dis,gene'
-
 	aggregate_column_data.py -i generate_clusters)/raw_clustered_genes.txt -x 1 -a 2 -s ',' > genes_by_cluster_ALL.txt
 	echo -e "Cluster_id\tASP_value\tAssociated_genes_by_MONDO\tASP_expanded_genes" > cluster_table.txt
 	merge_tabular.py generate_clusters)/stats_by_cluster.txt genes_by_cluster_ALL.txt analyze_clusters_connected_expand_clusters)/genes_by_cluster.txt | sed 's/None/-/g' >> cluster_table.txt
