@@ -67,7 +67,7 @@ ${plotter.scatter2D(id="expanded_cluster_size_ASP.txt",
 		x_label = "Genes by cluster", 
 		y_label = "ASP value", 
 		z_label = "Diseases per cluster", 
-		title = "Average shortest path vs cluster size: raw network.", 
+		title = "Average shortest path vs cluster size: expanded network.", 
                 config={"graphOrientation":"vertical"})
 	}
 				</td>
@@ -86,32 +86,20 @@ ${plotter.scatter2D(id="expanded_cluster_size_ASP.txt",
 	<h2 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters. </h2>
 	
 	<h3 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters in GO: Molecular Functions categories. </h3>
-	<table width="1100">
-		<tr>
-     		<td>	
-	${ plotter.embed_img('raw_enrichment/emaplot_MF.png')}
-	${ plotter.embed_img('raw_enrichment/dotplot_MF.png')}
-			</td>
-		</tr>
-	</table>
+
+	${ plotter.embed_img('raw_enrichment/emaplot_MF.png', img_attribs="width=500")}
+	${ plotter.embed_img('raw_enrichment/dotplot_MF.png', img_attribs="width=500")}
+	
 	<h3 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters in GO: Biological Process categories. </h3>
-	<table width="1100">
-		<tr>
-     		<td>
-	${ plotter.embed_img('raw_enrichment/emaplot_BP.png')}
-	${ plotter.embed_img('raw_enrichment/dotplot_BP.png')}
-			</td>
-		</tr>
-	</table>	
+
+	${ plotter.embed_img('raw_enrichment/emaplot_BP.png', img_attribs="width=500")}
+	${ plotter.embed_img('raw_enrichment/dotplot_BP.png', img_attribs="width=500")}
+
 	<h3 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters in GO: Cellular component categories. </h3>
-	<table width="1100">
-		<tr>
-     		<td>		
-	${ plotter.embed_img('raw_enrichment/emaplot_CC.png')}
-	${ plotter.embed_img('raw_enrichment/emaplot_CC.png')}
-			</td>
-		</tr>
-	</table>
+
+	${ plotter.embed_img('raw_enrichment/emaplot_CC.png', img_attribs="width=500")}
+	${ plotter.embed_img('raw_enrichment/emaplot_CC.png', img_attribs="width=500")}
+
 </div>
 		
 
