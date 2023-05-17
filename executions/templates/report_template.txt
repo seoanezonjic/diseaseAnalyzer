@@ -1,0 +1,120 @@
+<h1 style="text-align:center; background-color:#d6eaf8 ">Disease report</h1>
+<div style="overflow: hidden">
+
+	<h2 style="text-align:center; background-color:#d6eaf8 ">Clustering robustness.</h2>
+	${ plotter.embed_img('copat/clustering_heatmap.png')}
+
+	<h2 style="text-align:center; background-color:#d6eaf8 ">Gene network data: STRING 1000 minus combined score distribution.</h2>
+		<table width="1100">
+			<tr>
+				<td>
+					${ plotter.density(id = 'filtered_string', fields = [2], header = False, row_names = False, fillDensity = False, median = False)}
+				</td>
+			</tr>
+		</table>
+
+	<h2 style="text-align:center; background-color:#d6eaf8 ">Nodes degree distribution: plot distribution of hub z-scores by genes.</h2>
+		<table width="1100">
+			<tr>
+				<td>
+					${ plotter.density(id = 'node_attributes', fields = [2], header = False, row_names = False, fillDensity = False, median = False)}
+				</td>
+			</tr>
+		</table>
+	<h2 style="text-align:center; background-color:#d6eaf8 "> Genes frequency distribution: number of times the same gene is associated with different diseases within clusters. </h2>
+		<table width="1100">
+			<tr>
+				<td>
+					${ plotter.density(id = 'gene_stats', fields = [1], header = True, row_names = False, fillDensity = False, median = False)}
+				</td>
+			</tr>
+		</table>
+	<h2 style="text-align:center; background-color:#d6eaf8 "> Average shortest path vs cluster size: raw network. </h2>
+		<table width="1100">
+			<tr>
+				<td>
+${plotter.scatter2D(id="raw_cluster_size_ASP.txt", 
+		transpose=False, 
+		fields=[0,1,2], 
+		add_header_row_names=True, 
+		header=True, 
+		row_names=False, 
+		xAxis = ["clusterSize"], 
+		yAxis = ["aspValue"], 
+		pointSize = "diseasePerCluster", 
+		x_label = "Genes by cluster", 
+		y_label = "ASP value", 
+		z_label = "Diseases per cluster", 
+		title = "Average shortest path vs cluster size: raw network.", 
+                config={"graphOrientation":"vertical"})
+	}
+				</td>
+			</tr>
+		</table>
+	<h2 style="text-align:center; background-color:#d6eaf8 "> Average shortest path vs cluster size: expanded network. </h2>
+		<table width="1100">
+			<tr>
+				<td>
+${plotter.scatter2D(id="expanded_cluster_size_ASP.txt", 
+		transpose=False, 
+		fields=[0,1,2], 
+		add_header_row_names=True, 
+		header=True, 
+		row_names=False, 
+		xAxis = ["clusterSize"], 
+		yAxis = ["aspValue"], 
+		pointSize = "diseasePerCluster", 
+		x_label = "Genes by cluster", 
+		y_label = "ASP value", 
+		z_label = "Diseases per cluster", 
+		title = "Average shortest path vs cluster size: raw network.", 
+                config={"graphOrientation":"vertical"})
+	}
+				</td>
+			</tr>
+		</table>
+
+	<h2 style="text-align:center; background-color:#d6eaf8 "> Cluster prioritization in STRING network. </h2>
+		<table width="1100">
+			<tr>
+                <td>
+                    ${ plotter.dotplot(id = 'canvas_table', header = True, row_names = True, connect = True, height = 300, title = "CRank values per cluster") }
+                </td>
+			</tr>
+		</table>
+
+	<h2 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters. </h2>
+	
+	<h3 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters in GO: Molecular Functions categories. </h3>
+	<table width="1100">
+		<tr>
+     		<td>	
+	${ plotter.embed_img('raw_enrichment/emaplot_MF.png')}
+	${ plotter.embed_img('raw_enrichment/dotplot_MF.png')}
+			</td>
+		</tr>
+	</table>
+	<h3 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters in GO: Biological Process categories. </h3>
+	<table width="1100">
+		<tr>
+     		<td>
+	${ plotter.embed_img('raw_enrichment/emaplot_BP.png')}
+	${ plotter.embed_img('raw_enrichment/dotplot_BP.png')}
+			</td>
+		</tr>
+	</table>	
+	<h3 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters in GO: Cellular component categories. </h3>
+	<table width="1100">
+		<tr>
+     		<td>		
+	${ plotter.embed_img('raw_enrichment/emaplot_CC.png')}
+	${ plotter.embed_img('raw_enrichment/emaplot_CC.png')}
+			</td>
+		</tr>
+	</table>
+</div>
+		
+
+
+
+

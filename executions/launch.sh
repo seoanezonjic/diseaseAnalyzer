@@ -16,6 +16,10 @@ temp_files=$global_path'/executions/temp_files'
 output_folder=$global_path'/executions/aRD_workflow'
 list_path=$global_path'/lists'
 orpha_codes=$dataset_path'/HP:0000365.txt'
+#orpha_codes=$dataset_path'/HP:0410008.txt'
+#orpha_codes=$dataset_path'/hearImp_orpha_codes'
+#orpha_codes=$dataset_path'/neuromuscular_dis_orpha' #TFM
+
 export PATH=$scripts_path:$PATH
 source ~soft_bio_267/initializes/init_pets
 source ~soft_bio_267/initializes/init_python
@@ -75,7 +79,7 @@ if [ "$1" == "1b" ]; then
 fi
 
 gene_filter_values=( 0 )
-combined_score_filts=( 900 )
+combined_score_filts=( 700 )
 similarity_measures=( 'lin' )
 #similarity_measures=( 'lin' 'resnik' 'jiang_conrath' )
 min_groups=( 0 )
@@ -93,7 +97,7 @@ if [ "$1" == "2" ]; then
 					execution_name=$similarity_measure"_"$min_group"_"$combined_score"_"$gene_filter_value
 					var_info=`echo -e "\\$similarity_measure=$similarity_measure,
 					\\$string_network=$temp_files/string_transl_network.txt,
-					\\$hub_zscore=3,
+					\\$hub_zscore=2.5,
 					\\$white_list=$list_path'/white_list',
 					\\$string_dict=$dataset_path/9606.protein.info.v11.5.txt,
 					\\$combined_score=$combined_score,
@@ -104,7 +108,7 @@ if [ "$1" == "2" ]; then
 					\\$disease_mondo_genes=$temp_files'/disease_mondo_genes.txt',
 					\\$disease_hpo_file=$temp_files'/disease_hpos.txt',
 					\\$all_diseases=$temp_files'/filtered_orpha_codes.txt',
-					\\$report_template=$global_path/executions/templates/angio_report.erb,
+					\\$report_template=$global_path/executions/templates/report_template.txt,
 					\\$scripts_path=$scripts_path" | tr -d '[:space:]' `
 					AutoFlow -w templates/aRD_analysis.txt -t '7-00:00:00' -m '100gb' -c 4 -o $output_folder"/"$execution_name -n 'sr' -e -V $var_info $2
 				done
@@ -130,6 +134,5 @@ elif [ "$1" == "2b" ]; then
 fi
 
 #orpha_codes=$dataset_path'/HP:0000407.txt'
-#orpha_codes=$dataset_path'/hearImp_orpha_codes'
 #orpha_codes=$dataset_path'/orphas_2012.txt' #antiguo: raquel_aRD_orpha_codes.txt
 #orpha_codes='/mnt/home/users/pab_001_uma/pedro/proyectos/angio/results/orpha_codes'
