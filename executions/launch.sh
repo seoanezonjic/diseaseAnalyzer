@@ -17,8 +17,9 @@ output_folder=$global_path'/executions/aRD_workflow'
 list_path=$global_path'/lists'
 orpha_codes=$dataset_path'/HP:0000365.txt'
 #orpha_codes=$dataset_path'/HP:0410008.txt'
-#orpha_codes=$dataset_path'/hearImp_orpha_codes'
-#orpha_codes=$dataset_path'/neuromuscular_dis_orpha' #TFM
+#orpha_codes=$dataset_path'/hearImp_orpha_codes
+#orpha_codes=$dataset_path'/nmd_orpha_codes'
+#orpha_codes=$dataset_path'/HP:0000729'
 
 export PATH=$scripts_path:$PATH
 source ~soft_bio_267/initializes/init_pets
@@ -26,7 +27,6 @@ source ~soft_bio_267/initializes/init_python
 
 mkdir -p $output_folder $dataset_path $temp_files
 
-ontology_file=$dataset_path'/mondo.obo'
 monarch_gene_disease=$dataset_path'/gene_disease.all.tsv'
 string_network=$dataset_path'/string_data.txt'
 
@@ -46,7 +46,6 @@ if [ "$1" == "1" ]; then
 	wget http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa -O $dataset_path'/phenotype.hpoa'
 	
     ### MONDO File with genes and diseases
-	wget 'http://purl.obolibrary.org/obo/mondo.obo' -O $ontology_file
 	wget 'https://archive.monarchinitiative.org/latest/tsv/all_associations/gene_disease.all.tsv.gz' -O $monarch_gene_disease'.gz'
 	gunzip $monarch_gene_disease'.gz'
 

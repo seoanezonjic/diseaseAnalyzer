@@ -83,9 +83,9 @@ ${plotter.scatter2D(id="expanded_cluster_size_ASP.txt",
 			</tr>
 		</table>
 
-	<h2 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters. </h2>
+	<h2 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment for raw clusters. </h2>
 	
-	<h3 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters in GO: Molecular Functions categories. </h3>
+	<h3 style="text-align:center; background-color:#d6eaf8 "> Gene ontology molecular functions. </h3>
 
 	${ plotter.embed_img('raw_enrichment/emaplot_MF.png', img_attribs="width=500")}
 	${ plotter.embed_img('raw_enrichment/dotplot_MF.png', img_attribs="width=500")}
@@ -98,7 +98,7 @@ ${plotter.scatter2D(id="expanded_cluster_size_ASP.txt",
 	<h3 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters in GO: Cellular component categories. </h3>
 
 	${ plotter.embed_img('raw_enrichment/emaplot_CC.png', img_attribs="width=500")}
-	${ plotter.embed_img('raw_enrichment/emaplot_CC.png', img_attribs="width=500")}
+	${ plotter.embed_img('raw_enrichment/dotplot_CC.png', img_attribs="width=500")}
 
 </div>
 		
