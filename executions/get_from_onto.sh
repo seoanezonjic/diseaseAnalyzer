@@ -15,11 +15,18 @@ source ~soft_bio_267/initializes/init_python
 if [ "$1" == "1" ]; then
 	mkdir $list_path
 	term=$2
+	if [ "$3" == "orpha" ]; then
+		codename='Orphanet'
+		codetag='ORPHA'
+	elif [[ "$3" == "omim" ]]; then
+		codename='OMIM'
+		codetag='OMIM'
+	fi
 	enc_term=`echo -e $term | sed 's/:/%3A/g'`
 	wget 'https://api.monarchinitiative.org/api/bioentity/phenotype/'$enc_term'/diseases?rows=10000&facet=false&unselect_evidence=false&exclude_automatic_assertions=false&fetch_objects=false&use_compact_associations=false&direct_taxon=false' -O $list_path/$term.json
 	get_items.py -i $list_path/$term.json > $list_path/$term.mondo		
-	semtools.py -i $list_path/$term.mondo --list -k "Orphanet:[0-9]*" --xref_sense -O MONDO -o $list_path/$term.dict
-	cut -f 2 $list_path/$term.dict | sort -u | sed 's/Orphanet/ORPHA/g' > $dataset_path/$term.txt
+	semtools.py -i $list_path/$term.mondo --list -k $codename":[0-9]*" --xref_sense -O MONDO -o $list_path/$term'.dict'
+	cut -f 2 $list_path/$term'.dict' | sort -u | sed "s/$codename/$codetag/g" > $dataset_path/$term.txt
 fi
 
 if [ "$1" == "2" ]; then
