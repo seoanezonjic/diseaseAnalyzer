@@ -1,7 +1,7 @@
 cohort_analysis){
-	source ~soft_bio_267/initializes/init_pets
+	source ~soft_bio_267/initializes/init_python
 	?
-	coPatReporter.rb -i $disease_hpo_file -p HPOID -d DiseaseID -C 20 -m $similarity_measure -o disease_clusters
+	cohort_analyzer -i $disease_hpo_file -p HPOID -d DiseaseID -C 20 -m $similarity_measure -o disease_clusters
 
 	if [ ! -s disease_clusters.html ]; then 
 		>&2 echo "Cohort analysis has failed"
@@ -17,25 +17,26 @@ generate_clusters){
 	LAYERS='gene,[A-Za-z0-9]'
 	awk '{ if ($3 >= $combined_score) print $1 "\t" $2 "\t" $3}' $string_network | tail -n +2 > string_sure_conn.txt
 	# Calculate degree and hub zscore with NetAnalyzer
-	netanalyzer.py -i string_sure_conn.txt -l $LAYERS -A 'get_degree,get_degreeZ' -o out
+	netanalyzer -i string_sure_conn.txt -l $LAYERS -A 'get_degree,get_degreeZ' -o out
 	awk '{ if ($3 >= $hub_zscore) print $1 }' node_attributes.txt > computed_hub_nodes
-	intersect_columns.py -a computed_hub_nodes -b $white_list -k a > hub_nodes
+	intersect_columns -a computed_hub_nodes -b $white_list -k a > hub_nodes
 	# Invert string value to calculate ASP (djkistra algorithm)
 	grep -v -w -F -f hub_nodes string_sure_conn.txt | awk '{print $1 "\t" $2 "\t" 1000 - $3}' > filtered_string.txt
+	desaggregate_column_data -i cohort_analysis)/temp/"$similarity_measure"_clusters.txt -x 2 -s ',' | awk '{ print $2"\t"$1}' > $similarity_measure"_dis_clus.txt"
 	?	
-	clusterORPHA_to_clusterGEN.py -i cohort_analysis)/temp/"$similarity_measure"_clusters.txt -t $disease_gene_file -o raw_clustered_genes.txt -m $min_group -F $gene_filter # to get genes for each disease cluster
+	clusterORPHA_to_clusterGEN.py -i $similarity_measure"_dis_clus.txt" -t $disease_gene_file -o raw_clustered_genes.txt -m $min_group -F $gene_filter # to get genes for each disease cluster
 	
 	## Expand clusters by genes and calculate ASP:
-	netanalyzer.py -i filtered_string.txt -G raw_clustered_genes.txt -l $LAYERS -x 'sht_path' --one_sht_pairs &> all_missing_genes.txt
+	netanalyzer -i filtered_string.txt -G raw_clustered_genes.txt -l $LAYERS -x 'sht_path' --one_sht_pairs &> all_missing_genes.txt
 	cut -d ' ' -f 2,3,9 all_missing_genes.txt | grep 'id:' | cut -d ' ' -f 2,3 | tr ' ' "\t" | awk '{print $2 "\t" $1}' > missing_genes.txt
 
-	netanalyzer.py -i filtered_string.txt -G raw_clustered_genes.txt -l $LAYERS --output_metrics_by_cluster group_metrics.txt -M 'avg_sht_path'
+	netanalyzer -i filtered_string.txt -G raw_clustered_genes.txt -l $LAYERS --output_metrics_by_cluster group_metrics.txt -M 'avg_sht_path'
 
-	tail -n +2 group_metrics.txt | sort -k2 -n | grep -v -w NULL > filtered_stats_by_cluster.txt
+	tail -n +2 group_metrics.txt | sort -k2 -n | grep -v -w 'nan' > filtered_stats_by_cluster.txt
 	cut -f 1 filtered_stats_by_cluster.txt > connected_clusters.txt
 	grep -w -F -f connected_clusters.txt raw_clustered_genes.txt > connected_raw_clusters
 	grep -w -F -f connected_clusters.txt expand_clusters.txt > connected_expand_clusters	
-	aggregate_column_data.py -i missing_genes.txt -x 1 -a 2 -s ',' > missing_genes_table.txt
+	aggregate_column_data -i missing_genes.txt -x 1 -a 2 -s ',' > missing_genes_table.txt
 
 	if [ ! -s raw_clustered_genes.txt ] || [ ! -s expand_clusters.txt ]; then
 		>&2 echo "Clustering has failed"
@@ -54,9 +55,9 @@ prioritize_clusters_[connected_raw_clusters;connected_expand_clusters]){
 	cut -f 2 temp/clusters > temp/cl_genes
 	cat temp/string_nodes temp/cl_genes | sort -u | awk '{print $1 "\t" NR}' > temp/gene_index
 	cut -f 1,2 generate_clusters)/filtered_string.txt > temp/crank_string.txt
-	standard_name_replacer.py -i temp/crank_string.txt -I temp/gene_index -c 1,2 -o temp/crank_string.txt_rep 
-	standard_name_replacer.py -i temp/clusters -I temp/gene_index -c 2 -o temp/clusters_rep
-	aggregate_column_data.py -i temp/clusters_rep -x 1 -a 2 -s ',' | tr '\t' ' ' | tr ',' ' ' > temp/clustered_genes_AGG.txt
+	standard_name_replacer -i temp/crank_string.txt -I temp/gene_index -c 1,2 -o temp/crank_string.txt_rep 
+	standard_name_replacer -i temp/clusters -I temp/gene_index -c 2 -o temp/clusters_rep
+	aggregate_column_data -i temp/clusters_rep -x 1 -a 2 -s ',' | tr '\t' ' ' | tr ',' ' ' > temp/clustered_genes_AGG.txt
 	?
 	crank -i:temp/crank_string.txt_rep -c:temp/clustered_genes_AGG.txt -o:crank_metrics.txt
 	# Nota: mínimo 2 genes por cluster para priorizar
@@ -71,7 +72,7 @@ analyze_clusters_[connected_raw_clusters;connected_expand_clusters]){
 	source ~soft_bio_267/initializes/init_degenes_hunter
 	export PATH=~soft_bio_267/programs/x86_64/scripts:$PATH
 	export PATH=$scripts_path:$PATH
-	aggregate_column_data.py -i generate_clusters)/(*) -x 1 -a 2 -s ',' > genes_by_cluster.txt
+	aggregate_column_data -i generate_clusters)/(*) -x 1 -a 2 -s ',' > genes_by_cluster.txt
 	?
 	clusters_to_enrichment.R -i genes_by_cluster.txt -w 1 -k "SYMBOL" -p 0.01 -c -o gene_clusters -M 'PRS' -S 0.7 -C 'ancestor' -F
 }
@@ -81,11 +82,11 @@ report_data){
 	export PATH=$scripts_path:$PATH
 	
 	## Combine files to generate cluster_size_asp file
-	combine_files.py -i generate_clusters)/filtered_stats_by_cluster.txt -f generate_clusters)/connected_raw_clusters -g $disease_gene_file -d cohort_analysis)/temp/"$similarity_measure"_clusters.txt -o raw_cluster_size_ASP.txt
-	combine_files.py -i generate_clusters)/filtered_stats_by_cluster.txt -f generate_clusters)/connected_expand_clusters -g $disease_gene_file -d cohort_analysis)/temp/"$similarity_measure"_clusters.txt -o expanded_cluster_size_ASP.txt
+	combine_files.py -i generate_clusters)/filtered_stats_by_cluster.txt -f generate_clusters)/connected_raw_clusters -g $disease_gene_file -d generate_clusters)/"$similarity_measure"_dis_clus.txt -o raw_cluster_size_ASP.txt
+	combine_files.py -i generate_clusters)/filtered_stats_by_cluster.txt -f generate_clusters)/connected_expand_clusters -g $disease_gene_file -d generate_clusters)/"$similarity_measure"_dis_clus.txt -o expanded_cluster_size_ASP.txt
 	
 	## Generate canva table
-	merge_tabular.py !prioritize_clusters_!/crank_metrics.txt > metric_table
+	merge_tabular !prioritize_clusters_!/crank_metrics.txt > metric_table
 	echo -e '\traw\texpanded' > canvas_table
 	tail -n +2 metric_table |cut -f 1,2,6 | grep -v '-' | sort -r -k 2,2 -n | awk '{print "cl" $0}' >> canvas_table
 	
@@ -95,31 +96,30 @@ report_data){
 	mkdir expand_enrichment
 	ln -s analyze_clusters_connected_expand_clusters)/gene_clusters/*.png expand_enrichment/
 	
-	rm -rf copat; mkdir copat
-	ln -s cohort_analysis)/temp/"$similarity_measure"_heatmap.png copat/clustering_heatmap.png
-	
 	rm -rf clust; mkdir clust
+	
 	ln -s generate_clusters)/filtered_string.txt clust/filtered_string
+	ln -s generate_clusters)/lin_dis_clus.txt clust/lin_dis_clus
 	ln -s generate_clusters)/node_attributes.txt clust/node_attributes
 	ln -s generate_clusters)/gene_stats.txt clust/gene_stats
 	
 	?
-	report_html.py -t $report_template -d canvas_table,clust/filtered_string,clust/node_attributes,clust/gene_stats,raw_cluster_size_ASP.txt,expanded_cluster_size_ASP.txt -o cluster_report
-	parse_table_info.py -i $disease_mondo_genes -f $disease_hpo_file -c cohort_analysis)/temp/"$similarity_measure"_clusters.txt -d $phenotype_annotation -o full_info_table.txt
+	report_html -t $report_template -d canvas_table,clust/filtered_string,clust/node_attributes,clust/gene_stats,raw_cluster_size_ASP.txt,expanded_cluster_size_ASP.txt -o cluster_report
+	parse_table_info.py -i $disease_mondo_genes -f $disease_hpo_file -c clust/lin_dis_clus -d $phenotype_annotation -o full_info_table.txt
 	
 	# Generate two cols file for NetAnalyzer
 	tail -n +2 full_info_table.txt | awk -F "\t" '{print "cl" $3 "\t" $2"*"}' | sort -u > net_tab
-	tail -n +2 full_info_table.txt | awk -F "\t" '{print $2"*" "\t" $4}' | grep -w -v '-' | desaggregate_column_data.py -i - -x 2 -s ',' | sort -u >> net_tab
+	tail -n +2 full_info_table.txt | awk -F "\t" '{print $2"*" "\t" $4}' | grep -w -v '-' | desaggregate_column_data -i - -x 2 -s ',' | sort -u >> net_tab
 	
 	# Preparing Cytoscape disease-cluster-gene network file:
 	LAYERS='cl,cl[0-9];dis,\*;gene,\S*'
-    netanalyzer.py -i net_tab -l $LAYERS -g cluster_disease_gene_net --graph_options 'method=cyt_app'
-	aggregate_column_data.py -i generate_clusters)/raw_clustered_genes.txt -x 1 -a 2 -s ',' > genes_by_cluster_ALL.txt
+    netanalyzer -i net_tab -l $LAYERS -g cluster_disease_gene_net --graph_options 'method=cyt_app'
+	aggregate_column_data -i generate_clusters)/raw_clustered_genes.txt -x 1 -a 2 -s ',' > genes_by_cluster_ALL.txt
 	echo -e "Cluster_id\tASP_value\tAssociated_genes_by_MONDO\tASP_expanded_genes" > cluster_table.txt
-	merge_tabular.py generate_clusters)/stats_by_cluster.txt genes_by_cluster_ALL.txt analyze_clusters_connected_expand_clusters)/genes_by_cluster.txt | sed 's/None/-/g' >> cluster_table.txt
+	merge_tabular generate_clusters)/filtered_stats_by_cluster.txt genes_by_cluster_ALL.txt analyze_clusters_connected_expand_clusters)/genes_by_cluster.txt | sed 's/None/-/g' >> cluster_table.txt
 	cp full_info_table.txt full_info_table_withNOphen.txt
 	sort -u $disease_gene_file > genes
-	aggregate_column_data.py -i genes -x 1 -a 2 -s ',' > genes_agg
+	aggregate_column_data -i genes -x 1 -a 2 -s ',' > genes_agg
 	cut -f 1 full_info_table.txt | grep -v -w -F -f - genes_agg | awk '{print $1 "\t-\t-\t" $2 "\t-"}' >> full_info_table_withNOphen.txt
-	merge_tabular.py full_info_table_withNOphen.txt $all_diseases > full_info_table_withNOphenNOinfo.txt
+	merge_tabular full_info_table_withNOphen.txt $all_diseases > full_info_table_withNOphenNOinfo.txt
 }
