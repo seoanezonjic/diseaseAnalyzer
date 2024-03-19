@@ -3,7 +3,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem='20gb'
 #SBATCH --time='01:00:00'
-#SBATCH --constraint=sd
+#SBATCH --constraint=cal
 #SBATCH --error=job.%J.err
 #SBATCH --output=job.%J.out
 

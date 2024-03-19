@@ -113,7 +113,8 @@ report_data){
 	
 	# Preparing Cytoscape disease-cluster-gene network file:
 	LAYERS='cl,cl[0-9];dis,\*;gene,\S*'
-    netanalyzer -i net_tab -l $LAYERS -g cluster_disease_gene_net --graph_options 'method=cyt_app'
+    	netanalyzer -i net_tab -l $LAYERS -g cluster_disease_gene_net --graph_options 'method=cyt_app'
+	netanalyzer -i net_tab -l $LAYERS -g cluster_disease_gene_net --graph_options 'method=pyvis,group=layer'
 	aggregate_column_data -i generate_clusters)/raw_clustered_genes.txt -x 1 -a 2 -s ',' > genes_by_cluster_ALL.txt
 	echo -e "Cluster_id\tASP_value\tAssociated_genes_by_MONDO\tASP_expanded_genes" > cluster_table.txt
 	merge_tabular generate_clusters)/filtered_stats_by_cluster.txt genes_by_cluster_ALL.txt analyze_clusters_connected_expand_clusters)/genes_by_cluster.txt | sed 's/None/-/g' >> cluster_table.txt
