@@ -26,7 +26,6 @@ source ~soft_bio_267/initializes/init_python
 
 mkdir -p $output_folder $dataset_path $temp_files
 
-monarch_gene_disease=$dataset_path'/gene_disease.all.tsv'
 string_network=$dataset_path'/string_data.txt'
 
 if [ "$1" == "1" ]; then
@@ -44,10 +43,6 @@ if [ "$1" == "1" ]; then
 	####wget http://purl.obolibrary.org/obo/hp/hpoa/genes_to_phenotype.txt -O $temp_files"/genes_to_phenotype.txt"
 	wget http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa -O $dataset_path'/phenotype.hpoa'
 	
-    ### MONDO File with genes and diseases
-	wget 'https://archive.monarchinitiative.org/latest/tsv/all_associations/gene_disease.all.tsv.gz' -O $monarch_gene_disease'.gz'
-	gunzip $monarch_gene_disease'.gz'
-
 	touch $temp_files/dis_white_list
 fi
 
@@ -86,8 +81,12 @@ if [ "$1" == "1b" ]; then
 	echo 'executing semtools...'
 	semtools -i $temp_files/disease_IDs --list -k "Orphanet:[0-9]*|OMIM:[0-9]*" -O MONDO -o $temp_files/disease_mondo_codes.txt
 	sed -i "s/$codename/$codetag/g" $temp_files/disease_mondo_codes.txt
-	get_mondo_genes.py -i $temp_files/disease_mondo_codes.txt -m $monarch_gene_disease -o $temp_files/disease_mondo_genes.txt
+	cut -f 2 $temp_files/disease_mondo_codes.txt > $temp_files/mondo_codes.txt
+	echo 'get genes for diseases from monarch'
+	monarch_entities -i $temp_files/mondo_codes.txt -r disease-gene -a -o $temp_files/monarch_gene_disease_API # in progresss
+	get_mondo_genes.py -i $temp_files/disease_mondo_codes.txt -m $temp_files/monarch_gene_disease_API -o $temp_files/disease_mondo_genes.txt
 	cut -f 1,3 $temp_files/disease_mondo_genes.txt > $temp_files/disease_genes.txt
+	echo 'extract STRING data'
 	standard_name_replacer -i $string_network -I $dataset_path"/9606.protein.info.v11.5.txt" -c 1,2 -s ' ' | tr ' ' '\t' > $temp_files/string_transl_network.txt
 fi
 
