@@ -1,0 +1,7 @@
+export output_folder=$execution_path/test_results'
+export dis_codes=$list_path'/HP:0000365.txt'
+export similarity_measure=lin
+export min_group=0
+export combined_score=700
+export gene_filter_value=0
+

@@ -11,22 +11,6 @@ export PATH=$scripts_path:$PATH
 source ~soft_bio_267/initializes/init_python
 
 
-if [ "$1" == "1" ]; then
-	mkdir $list_path
-	term=$2
-	if [ "$3" == "orpha" ]; then
-		codename='Orphanet'
-		codetag='ORPHA'
-	elif [[ "$3" == "omim" ]]; then
-		codename='OMIM'
-		codetag='OMIM'
-	fi
-	monarch_entities -d $term -r phenotype-disease -o $list_path/$term'_disease_results.tab'
-	cut -f 1 $list_path/$term'_disease_results.tab' | sort -u > $list_path/$term.mondo
-	semtools -i $list_path/$term.mondo --list -k $codename":[0-9]*" --xref_sense -O MONDO -o $list_path/$term'.dict'
-	cut -f 2 $list_path/$term'.dict' | sort -u | sed "s/$codename/$codetag/g" > $dataset_path/$term.txt
-fi
-
 if [ "$1" == "2" ]; then
 
 	wget https://data.monarchinitiative.org/latest/tsv/gene_associations/gene_disease.9606.tsv.gz -O $temp_files'/gene_disease.9606.tsv.gz'
