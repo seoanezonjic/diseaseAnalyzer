@@ -14,17 +14,12 @@ def load_mondo_file(file):
     with open(file, 'r') as f:
         for line in f:
             line = line.rstrip()
-            if 'subject_taxon_label' in line: continue
-            info = line.split("\t")
-            if info[3] != 'Homo sapiens': continue
-            gene_id = info[1].replace(' (human)', '')
-            if re.match(r'[^A-Z0-9a-z_-]', gene_id) != None: continue
-            mondo_id = info[4]
+            mondo_id, gene_hgnc, gene_symb = line.split("\t")
             query = mondo_genes.get(mondo_id)
             if query is None:
-                mondo_genes[mondo_id] = [gene_id]
+                mondo_genes[mondo_id] = [gene_symb]
             else:
-                query.append(gene_id)
+                if gene_symb not in query: query.append(gene_symb)
     return mondo_genes
 
 def find_genes(input_file, mondo_genes, output_file):
