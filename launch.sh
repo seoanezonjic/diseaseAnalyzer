@@ -85,8 +85,10 @@ if [[ "$modules" =~ "1b" ]]; then # Create disease-gene network
 	echo 'preparing files...'
 	#intersect_columns -a $dis_codes -b $dis_white_list > $temp_files/filtered_dis_codes.txt	
 	echo -e "DiseaseID\tHPOID" > $temp_files/disease_hpos.txt
-	grep -w -F -f $dis_codes $dataset_path/dis_name_phen.txt | cut -f 1,3 | sort -u | aggregate_column_data -i - -s '|' -x 1 -a 0 >> $temp_files/disease_hpos.txt	
-	sed "s/$codetag/$codename/g" $dis_codes > $temp_files/disease_IDs
+	
+	echo "$dataset_path/dis_name_phen.txt"
+	grep -w -F -f $temp_files/filtered_dis_codes.txt $dataset_path/dis_name_phen.txt | cut -f 1,3 | sort -u | aggregate_column_data -i - -s '|' -x 1 -a 0 >> $temp_files/disease_hpos.txt	
+	sed "s/$codetag/$codename/g" $temp_files/filtered_dis_codes.txt > $temp_files/disease_IDs
 	echo 'executing semtools...'
 	semtools -i $temp_files/disease_IDs --list -k "Orphanet:[0-9]*|OMIM:[0-9]*" -O MONDO -o $temp_files/disease_mondo_codes.txt # semtools with --list set is to get a dictionary
 	sed -i "s/$codename/$codetag/g" $temp_files/disease_mondo_codes.txt
