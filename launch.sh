@@ -11,7 +11,6 @@
 framework_dir=`dirname $0`
 export global_path=$(readlink -f $framework_dir )
 config=$1
-module=$2
 
 scripts_path=$global_path/scripts
 dataset_path=$global_path'/datasets'
@@ -19,7 +18,7 @@ execution_path=$global_path'/executions'
 source $config
 temp_files=$output_folder'/temp_files'
 list_path=$output_folder'/lists'
-dis_white_list=$output_folder/dis_white_list
+#dis_white_list=$output_folder/dis_white_list
 
 export PATH=$scripts_path:$PATH
 source ~soft_bio_267/initializes/init_python
@@ -27,85 +26,79 @@ source ~soft_bio_267/initializes/init_python
 mkdir -p $output_folder $dataset_path $temp_files $list_path
 
 
-if [ "$module" == "1" ]; then
+if [[ "$modules" =~ "d" ]]; then
 	echo 'Downloading and processing source files'
-	
 	wget https://stringdb-static.org/download/protein.links.v11.5/9606.protein.links.v11.5.txt.gz -O $dataset_path"/9606.protein.links.v11.5.txt.gz"
-	echo 'extract STRING data'
-    gunzip $dataset_path"/9606.protein.links.v11.5.txt.gz"
-	standard_name_replacer -i $dataset_path'/9606.protein.links.v11.5.txt' -I $dataset_path"/9606.protein.info.v11.5.txt" -c 1,2 -s ' ' | tr ' ' '\t' > $dataset_path/string_transl_network.txt
+    wget https://stringdb-static.org/download/protein.info.v11.5/9606.protein.info.v11.5.txt.gz -O $dataset_path"/9606.protein.info.v11.5.txt.gz" # File with Human GeneID codes and STRING IDs (used as dictionary)
+   	gunzip $dataset_path/*.gz
 
-	### File with Human GeneID codes and STRING IDs (used as dictionary)
-    wget https://stringdb-static.org/download/protein.info.v11.5/9606.protein.info.v11.5.txt.gz -O $dataset_path"/9606.protein.info.v11.5.txt.gz"
-    gunzip $dataset_path"/9606.protein.info.v11.5.txt.gz"
+	standard_name_replacer -i $dataset_path'/9606.protein.links.v11.5.txt' -I $dataset_path"/9606.protein.info.v11.5.txt" -c 1,2 -s ' ' | tr ' ' '\t' > $dataset_path/string_transl_network.txt
 
     ### File with HPO phenotypes
 	####wget http://purl.obolibrary.org/obo/hp/hpoa/genes_to_phenotype.txt -O $temp_files"/genes_to_phenotype.txt"
 	wget http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa -O $dataset_path'/phenotype.hpoa'
 	grep -v '#' $dataset_path/phenotype.hpoa | grep -v -w 'NOT' | cut -f 1,2,4 > $dataset_path/dis_name_phen.txt
 	
-	touch $dis_white_list
+	#touch $dis_white_list
 fi
 
-if [ "$module" == "HPO" ]; then # GEnerate disease list from HPO
-	term=$3
-	if [ "$4" == "orpha" ]; then
+if [[ "$modules" =~ "HPO" ]]; then # GEnerate disease list from HPO
+	echo 'Searching HPO'
+	# if [ "$disease_database" == "orpha" ]; then
+	# 	codename='Orphanet'
+	# 	codetag='ORPHA'
+	# elif [[ "$disease_database" == "omim" ]]; then
+	# 	codename='OMIM'
+	# 	codetag='OMIM'
+	# fi
+	monarch_entities -d $keyword_term -r phenotype-disease -o $list_path/$keyword_term'_disease_results.tab'
+	cut -f 1 $list_path/$keyword_term'_disease_results.tab' | sort -u > $list_path/$keyword_term.mondo
+	#semtools -i $list_path/$keyword_term.mondo --list -k $codename":[0-9]*" --xref_sense -O MONDO -o $list_path/$keyword_term'.dict'
+	#cut -f 2 $list_path/$keyword_term'.dict' | sort -u | sed "s/$codename/$codetag/g" > $list_path/$keyword_term.txt
+fi
+
+
+if [[ "$modules" =~ "1a" ]]; then # Filter disease list and convert to OMIM or Orphanet
+	echo "Filtering disease list"
+	if [ "$disease_database" == "orpha" ]; then
 		codename='Orphanet'
 		codetag='ORPHA'
-	elif [[ "$4" == "omim" ]]; then
+	elif [[ "$disease_database" == "omim" ]]; then
 		codename='OMIM'
 		codetag='OMIM'
 	fi
-	monarch_entities -d $term -r phenotype-disease -o $list_path/$term'_disease_results.tab'
-	cut -f 1 $list_path/$term'_disease_results.tab' | sort -u > $list_path/$term.mondo
-	semtools -i $list_path/$term.mondo --list -k $codename":[0-9]*" --xref_sense -O MONDO -o $list_path/$term'.dict'
-	cut -f 2 $list_path/$term'.dict' | sort -u | sed "s/$codename/$codetag/g" > $list_path/$term.txt
-fi
-
-
-if [ "$module" == "1a" ]; then # GEnerate white list on MONDO ontology to keep diseases of interest and remove discordant diseases (for example, keep genetic diseases instead infectious )
-	term=$3
-	if [ "$4" == "orpha" ]; then
-		codename='Orphanet'
-		codetag='ORPHA'
-	elif [[ "$4" == "omim" ]]; then
-		codename='OMIM'
-		codetag='OMIM'
-	fi
-	#MONDO:0003847 Mendelian disease (filter by those diseases with a genetic component)
 	echo 'Filtering list of phenotypes'
-	semtools -C $3 -O MONDO > $temp_files/filtered_mondo_codes.txt
+	semtools -i $list_path/$keyword_term.mondo --list -O MONDO -F "p($mondo_white_list)n($mondo_black_list)" > $temp_files/filtered_mondo_codes.txt
 	semtools -i $temp_files/filtered_mondo_codes.txt --list -k $codename":[0-9]*" --xref_sense -O MONDO -o $temp_files/mondo_dis_codes.txt
-	sed "s/$codename/$codetag/g" $temp_files/mondo_dis_codes.txt | cut -f 2 > $dis_white_list
+	sed "s/$codename/$codetag/g" $temp_files/mondo_dis_codes.txt | cut -f 2 | sort -u > $temp_files/filtered_dis_codes.txt
 fi
 
-if [ "$module" == "1b" ]; then # Create disease-gene network
-	if [ "$3" == "orpha" ]; then
+if [[ "$modules" =~ "1b" ]]; then # Create disease-gene network
+	echo "create network"
+	if [ "$disease_database" == "orpha" ]; then
 		codename='Orphanet'
 		codetag='ORPHA'
-	elif [[ "$3" == "omim" ]]; then
+	elif [[ "$disease_database" == "omim" ]]; then
 		codename='OMIM'
 		codetag='OMIM'
 	fi
 	echo 'preparing files...'
-	intersect_columns -a $dis_codes -b $dis_white_list > $temp_files/filtered_dis_codes.txt	
+	#intersect_columns -a $dis_codes -b $dis_white_list > $temp_files/filtered_dis_codes.txt	
 	echo -e "DiseaseID\tHPOID" > $temp_files/disease_hpos.txt
-	grep -w -F -f $temp_files/filtered_dis_codes.txt $dataset_path/dis_name_phen.txt | cut -f 1,3 | sort -u | aggregate_column_data -i - -s '|' -x 1 -a 0 >> $temp_files/disease_hpos.txt	
-	sed "s/$codetag/$codename/g" $temp_files/filtered_dis_codes.txt > $temp_files/disease_IDs
-	echo $temp_files/disease_IDs
-	# semtools with --list set is to get a dictionary
+	grep -w -F -f $dis_codes $dataset_path/dis_name_phen.txt | cut -f 1,3 | sort -u | aggregate_column_data -i - -s '|' -x 1 -a 0 >> $temp_files/disease_hpos.txt	
+	sed "s/$codetag/$codename/g" $dis_codes > $temp_files/disease_IDs
 	echo 'executing semtools...'
-	semtools -i $temp_files/disease_IDs --list -k "Orphanet:[0-9]*|OMIM:[0-9]*" -O MONDO -o $temp_files/disease_mondo_codes.txt
+	semtools -i $temp_files/disease_IDs --list -k "Orphanet:[0-9]*|OMIM:[0-9]*" -O MONDO -o $temp_files/disease_mondo_codes.txt # semtools with --list set is to get a dictionary
 	sed -i "s/$codename/$codetag/g" $temp_files/disease_mondo_codes.txt
 	cut -f 2 $temp_files/disease_mondo_codes.txt > $temp_files/mondo_codes.txt
 	echo 'get genes for diseases from monarch'
 	monarch_entities -i $temp_files/mondo_codes.txt -r disease-gene -a -o $temp_files/monarch_gene_disease_API # in progresss
 	get_mondo_genes.py -i $temp_files/disease_mondo_codes.txt -m $temp_files/monarch_gene_disease_API -o $temp_files/disease_mondo_genes.txt
-	cut -f 1,3 $temp_files/disease_mondo_genes.txt > $temp_files/disease_genes.txt
+	cut -f 1,3 $temp_files/disease_mondo_genes.txt | sort -u > $temp_files/disease_genes.txt
 fi
 
 workflow_folder=$output_folder/workflow
-if [ "$module" == "2" ]; then
+if [[ "$modules" =~ "2" ]]; then
 	source ~soft_bio_267/initializes/init_autoflow
 	echo 'Launching analysis'
 	var_info=`echo -e "\\$similarity_measure=$similarity_measure,
@@ -120,10 +113,10 @@ if [ "$module" == "2" ]; then
 	\\$phenotype_annotation=$temp_files'/dis_name_phen.txt',
 	\\$disease_mondo_genes=$temp_files'/disease_mondo_genes.txt',
 	\\$disease_hpo_file=$temp_files'/disease_hpos.txt',
-	\\$all_diseases=$temp_files'/filtered_dis_codes.txt',
+	\\$all_diseases=$dis_codes,
 	\\$report_template=$global_path/templates/report_template.txt,
 	\\$scripts_path=$scripts_path" | tr -d '[:space:]' `
-	AutoFlow -w templates/aRD_analysis.txt -t '7-00:00:00' -m '100gb' -c 4 -o $workflow_folder -n 'sr' -e -V $var_info $3
-elif [ "$module" == "2b" ]; then
-	flow_logger -w -e $workflow_folder -r all $3
+	AutoFlow -w templates/aRD_analysis.txt -t '7-00:00:00' -m '100gb' -c 4 -o $workflow_folder -n 'sr' -e -V $var_info $2
+elif [[ "$modules" =~ "2b" ]]; then
+	flow_logger -w -e $workflow_folder -r all $2
 fi

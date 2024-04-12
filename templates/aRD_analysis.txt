@@ -32,7 +32,7 @@ generate_clusters){
 
 	netanalyzer -i filtered_string.txt -G raw_clustered_genes.txt -l $LAYERS --output_metrics_by_cluster group_metrics.txt -M 'avg_sht_path'
 
-	tail -n +2 group_metrics.txt | sort -k2 -n | grep -v -w 'nan' > filtered_stats_by_cluster.txt
+	tail -n +2 group_metrics.txt | sort -k2 -n | grep -v -w 'NULL' > filtered_stats_by_cluster.txt
 	cut -f 1 filtered_stats_by_cluster.txt > connected_clusters.txt
 	grep -w -F -f connected_clusters.txt raw_clustered_genes.txt > connected_raw_clusters
 	grep -w -F -f connected_clusters.txt expand_clusters.txt > connected_expand_clusters	

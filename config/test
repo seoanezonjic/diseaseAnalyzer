@@ -1,5 +1,13 @@
-export output_folder=$execution_path/test_results'
-export dis_codes=$list_path'/HP:0000365.txt'
+export modules="d,HPO,1a,1b,2" # Which modules will be executed
+
+export keyword_term=HP:0000365 #Hearing impairment
+export disease_database=omim #omim/orpha
+
+export mondo_white_list=MONDO:0003847 #Mendelian disease (filter by those diseases with a genetic component)
+export mondo_black_list=MONDO:0019040 #chromosomal disorder 
+
+export output_folder=$execution_path'/test_results'
+export dis_codes=$temp_files/filtered_dis_codes.txt
 export similarity_measure=lin
 export min_group=0
 export combined_score=700
