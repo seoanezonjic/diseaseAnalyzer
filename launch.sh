@@ -104,7 +104,7 @@ if [[ "$modules" =~ "2" ]]; then
 	source ~soft_bio_267/initializes/init_autoflow
 	echo 'Launching analysis'
 	var_info=`echo -e "\\$similarity_measure=$similarity_measure,
-	\\$string_network=$dataset/string_transl_network.txt,
+	\\$string_network=$dataset_path/string_transl_network.txt,
 	\\$hub_zscore=2.5,
 	\\$white_list=$list_path'/white_list',
 	\\$string_dict=$dataset_path/9606.protein.info.v11.5.txt,
