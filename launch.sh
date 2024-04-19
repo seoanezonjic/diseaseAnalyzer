@@ -38,8 +38,7 @@ if [[ "$modules" =~ "d" ]]; then
 	####wget http://purl.obolibrary.org/obo/hp/hpoa/genes_to_phenotype.txt -O $temp_files"/genes_to_phenotype.txt"
 	wget http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa -O $dataset_path'/phenotype.hpoa'
 	grep -v '#' $dataset_path/phenotype.hpoa | grep -v -w 'NOT' | cut -f 1,2,4 > $dataset_path/dis_name_phen.txt
-	
-	#touch $dis_white_list
+	touch $list_path'/white_list'
 fi
 
 if [[ "$modules" =~ "HPO" ]]; then # GEnerate disease list from HPO
@@ -112,10 +111,10 @@ if [[ "$modules" =~ "2" ]]; then
 	\\$min_group=$min_group,
 	\\$gene_filter=$gene_filter_value,
 	\\$disease_gene_file=$temp_files/disease_genes.txt,
-	\\$phenotype_annotation=$temp_files'/dis_name_phen.txt',
+	\\$phenotype_annotation=$dataset_path'/dis_name_phen.txt',
 	\\$disease_mondo_genes=$temp_files'/disease_mondo_genes.txt',
 	\\$disease_hpo_file=$temp_files'/disease_hpos.txt',
-	\\$all_diseases=$dis_codes,
+	\\$all_diseases=$temp_files/filtered_dis_codes.txt,
 	\\$report_template=$global_path/templates/report_template.txt,
 	\\$scripts_path=$scripts_path" | tr -d '[:space:]' `
 	AutoFlow -w templates/aRD_analysis.txt -t '7-00:00:00' -m '100gb' -c 4 -o $workflow_folder -n 'sr' -e -V $var_info $2

@@ -79,18 +79,18 @@
 	
 	<h3 style="text-align:center; background-color:#d6eaf8 "> Gene ontology molecular functions. </h3>
 
-	${ plotter.embed_img('raw_enrichment/emaplot_MF.png', img_attribs="width=500")}
-	${ plotter.embed_img('raw_enrichment/dotplot_MF.png', img_attribs="width=500")}
+	${ plotter.embed_img('raw_enrichment/emaplot_MF.png', img_attribs="width='500px' height='500px'")}
+	${ plotter.embed_img('raw_enrichment/dotplot_MF.png', img_attribs="width='500px' height='500px'")}
 	
 	<h3 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters in GO: Biological Process categories. </h3>
 
-	${ plotter.embed_img('raw_enrichment/emaplot_BP.png', img_attribs="width=500")}
-	${ plotter.embed_img('raw_enrichment/dotplot_BP.png', img_attribs="width=500")}
+	${ plotter.embed_img('raw_enrichment/emaplot_BP.png', img_attribs="width='500px' height='500px'")}
+	${ plotter.embed_img('raw_enrichment/dotplot_BP.png', img_attribs="width='500px' height='500px'")}
 
 	<h3 style="text-align:center; background-color:#d6eaf8 "> Functional enrichment raw clusters in GO: Cellular component categories. </h3>
 
-	${ plotter.embed_img('raw_enrichment/emaplot_CC.png', img_attribs="width=500")}
-	${ plotter.embed_img('raw_enrichment/dotplot_CC.png', img_attribs="width=500")}
+	${ plotter.embed_img('raw_enrichment/emaplot_CC.png', img_attribs="width='500px' height='500px'")}
+	${ plotter.embed_img('raw_enrichment/dotplot_CC.png', img_attribs="width='500px' height='500px'")}
 
 
 </div>

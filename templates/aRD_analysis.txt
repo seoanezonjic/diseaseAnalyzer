@@ -1,4 +1,4 @@
-cohort_analysis){
+%cohort_analysis){
 	source ~soft_bio_267/initializes/init_python
 	?
 	cohort_analyzer -i $disease_hpo_file -p HPOID -d DiseaseID -C 20 -m $similarity_measure -o disease_clusters
@@ -9,7 +9,7 @@ cohort_analysis){
 	fi
 }
 
-generate_clusters){
+%generate_clusters){
 	resources: -t '7-00:00:00' -m '100gb' -c 20
 	source ~soft_bio_267/initializes/init_python
 	export PATH=$scripts_path:$PATH	
