@@ -2,6 +2,15 @@
 <div style="overflow: hidden">
 
 
+	<h2 style="text-align:center; background-color:#d6eaf8 ">Statistics table.</h2>
+		<table width="1100">
+			<tr>
+				<td>
+					${ plotter.table(id='stats_table.txt', header = True, row_names = True, styled='dt')}
+				</td>
+			</tr>
+		</table>
+
 	<h2 style="text-align:center; background-color:#d6eaf8 ">Gene network data: STRING 1000 minus combined score distribution.</h2>
 		<table width="1100">
 			<tr>

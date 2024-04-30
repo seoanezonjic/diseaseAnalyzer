@@ -1,4 +1,4 @@
-%cohort_analysis){
+cohort_analysis){
 	source ~soft_bio_267/initializes/init_python
 	?
 	cohort_analyzer -i $disease_hpo_file -p HPOID -d DiseaseID -C 20 -m $similarity_measure -o disease_clusters
@@ -9,7 +9,7 @@
 	fi
 }
 
-%generate_clusters){
+generate_clusters){
 	resources: -t '7-00:00:00' -m '100gb' -c 20
 	source ~soft_bio_267/initializes/init_python
 	export PATH=$scripts_path:$PATH	
@@ -103,6 +103,15 @@ report_data){
 	ln -s generate_clusters)/node_attributes.txt clust/node_attributes
 	ln -s generate_clusters)/gene_stats.txt clust/gene_stats
 	
+	# prepare stats 
+
+	echo -e "Description\tValue" > stats_table.txt
+	echo -e "Uniq genes by disease\t"`cut -f 2 $disease_gene_file | sort -u | wc -l` >> stats_table.txt
+	echo -e "Total diseases\t"`cat $disease_ids | wc -l` >> stats_table.txt
+	echo -e "Total raw clusters\t"`cut -f 1 generate_clusters)/raw_clustered_genes.txt | sort -u | wc -l`>> stats_table.txt
+	echo -e "Total lost genes\t"`cut -d ':' -f 3 generate_clusters)/all_missing_genes.txt | sort -u | wc -l`>> stats_table.txt
+	
+
 	?
 	report_html -t $report_template -d canvas_table,clust/filtered_string,clust/node_attributes,clust/gene_stats,raw_cluster_size_ASP.txt,expanded_cluster_size_ASP.txt -o cluster_report
 	parse_table_info.py -i $disease_mondo_genes -f $disease_hpo_file -c clust/lin_dis_clus -d $phenotype_annotation -o full_info_table.txt
@@ -113,7 +122,7 @@ report_data){
 	
 	# Preparing Cytoscape disease-cluster-gene network file:
 	LAYERS='cl,cl[0-9];dis,\*;gene,\S*'
-    	netanalyzer -i net_tab -l $LAYERS -g cluster_disease_gene_net --graph_options 'method=cyt_app'
+    netanalyzer -i net_tab -l $LAYERS -g cluster_disease_gene_net --graph_options 'method=cyt_app'
 	netanalyzer -i net_tab -l $LAYERS -g cluster_disease_gene_net --graph_options 'method=pyvis,group=layer'
 	aggregate_column_data -i generate_clusters)/raw_clustered_genes.txt -x 1 -a 2 -s ',' > genes_by_cluster_ALL.txt
 	echo -e "Cluster_id\tASP_value\tAssociated_genes_by_MONDO\tASP_expanded_genes" > cluster_table.txt

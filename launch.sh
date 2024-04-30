@@ -116,6 +116,7 @@ if [[ "$modules" =~ "2" ]]; then
 	\\$disease_hpo_file=$temp_files'/disease_hpos.txt',
 	\\$all_diseases=$temp_files/filtered_dis_codes.txt,
 	\\$report_template=$global_path/templates/report_template.txt,
+	\\$disease_ids=$temp_files/disease_IDs,
 	\\$scripts_path=$scripts_path" | tr -d '[:space:]' `
 	AutoFlow -w templates/aRD_analysis.txt -t '7-00:00:00' -m '100gb' -c 4 -o $workflow_folder -n 'sr' -e -V $var_info $2
 elif [[ "$modules" =~ "2b" ]]; then
